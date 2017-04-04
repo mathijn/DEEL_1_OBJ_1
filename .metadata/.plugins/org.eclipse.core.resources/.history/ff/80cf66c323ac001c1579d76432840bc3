@@ -1,0 +1,251 @@
+package yahtzee;
+
+import java.util.Random;
+
+/**
+ * De klasse Beurt representeert één beurt van een Yahtzee-
+ * spel. De klasse gooit de vijf dobbelstenen bepaalt de score
+ * voor een gekozen categorie.
+ * 
+ * @author Medewerker OUNL
+ *
+ */
+public class Beurt {
+  // attributen
+  
+  /**
+   * De vijf dobbelstenen
+   */
+  private Dobbelsteen[] stenen = new Dobbelsteen[5];
+  
+  /**
+   * Het aantal keren dat er in deze beurt geworpen is
+   */
+  private int keerGeworpen;
+  
+  /**
+   * Dit attribuut is true als er een yahtzee is geworpen die ook
+   * geteld mag worden als kleine of grote straat. Het attribuut
+   * is nodig omdat deze regel beurtoverstijgend is; het kan dus
+   * niet alleen bepaald worden op grond van de ogen in deze
+   * worp.
+   */
+  private boolean yahtzeeAlsJoker = false;
+  
+  /**
+   * Constructor voor nieuwe beurt; creëert de
+   * de dobbelstenen.
+   */
+  Beurt(){
+   for (int i = 0; i < 5; i++) {
+      stenen[i] = new Dobbelsteen();
+    }
+   keerGeworpen = 0;
+  }
+  
+  int getKeerGeworpen(){
+    return keerGeworpen;
+  }
+  
+  /**
+   * Levert de waarden van alle vijf dobbelstenen
+   */
+  int[] getOgen() {
+    int[] ogen = new int[5];
+    for (int i =0 ; i < 5; i++) {
+      ogen[i] = stenen[i].getOgen();
+    }
+    return ogen;
+  }
+  
+  /**
+   * Gooit de stenen opnieuw die niet op hold zijn gezet. 
+   * @param hold  vijf booleans die voor elk van de stenen aangeven
+   *              of deze moet worden vasgehouden (hold[i] = true) of
+   *              opnieuw moet worden gegooid (hold[i] = false).
+   */
+  void werp(boolean[] hold) {
+    if (keerGeworpen < Yahtzee.MAXAANTALWORPEN) {
+      for (int i = 0; i < 5; i++) {
+        if (!hold[i]) {
+          stenen[i].werp();
+        }
+      }
+      keerGeworpen++;
+    }
+  }
+  
+  /**
+   * Berekent de score van deze beurt na een keuze voor
+   * de gegeven categorie.
+   * Voorwaarde: 0 <= i < 13.
+   * @param i  het nummer van de categorie
+   * @return  de bijbehorende score
+   */
+  int berekenScore(int i) {
+    switch (i) {
+      case Yahtzee.ENEN:
+        return cijferScore(1);
+      case Yahtzee.TWEEEN:
+        return cijferScore(2);
+      case Yahtzee.DRIEEN:
+        return cijferScore(3);
+      case Yahtzee.VIEREN:
+        return cijferScore(4);
+      case Yahtzee.VIJVEN:
+        return cijferScore(5);
+      case Yahtzee.ZESSEN:
+        return cijferScore(6);
+      case Yahtzee.DRIEDEZELFDE:
+        return nDezelfdeScore(3);
+      case Yahtzee.CARRE:
+        return nDezelfdeScore(4);
+      case Yahtzee.FULLHOUSE:
+        return fullHouseScore();
+      case Yahtzee.KLEINESTRAAT:
+        return kleineStraatScore();
+      case Yahtzee.GROTESTRAAT:
+        return groteStraatScore();
+      case Yahtzee.YAHTZEE:
+        return yahtzeeScore();
+      case Yahtzee.CHANCE:
+        return berekenSom(); 
+      default:
+        return 0;
+    }
+  }
+  
+  /**
+   * Bepaalt de score in de categorie yahtzee
+   * @return  50 als er een yahtzee is gegooid, anders 0
+   */
+  int yahtzeeScore() {
+    if (nDezelfdeScore(5) > 0) {
+      return 50;
+    } else {
+      return 0;
+    }
+  }
+  
+  /**
+   * Wijzigt de waarde van het attribuut yahtzeeAlsJoker.
+   * @param waarde  de nieuwe waarde van dit attribuut
+   */
+  void setYahtzeeAlsJoker() {
+    yahtzeeAlsJoker = true;
+  }
+  
+  // de volgende methoden bepalen de score in elke categorie
+  
+  /**
+   * Bepaalt de score van de categorieën enen, tweeën, drieën,
+   * vieren, vijven en zessen
+   * Voorwaarde: 1 <= cijfer <= 6
+   * @param cijfer  het betreffende cijfer (1 tot en met 6)
+   */
+  private int cijferScore(int cijfer) {
+    int aantal = telAantal(cijfer);
+    return aantal * cijfer;
+  }
+  
+  /**
+   * Bepaalt de score in de categorieën 3 dezelfde en carré; wordt
+   * ook als hulpmethode gebruikt bij het bepalen van de yahtzee-score
+   * @param n  het aantal keer dat dezelfde waarde moet zijn gegooid
+   * @return  de som van het aantal ogen als er n keer dezelfde waarde is
+   *          gegooid en anders 0.
+   */
+  private int nDezelfdeScore(int n) {
+    for (int ogen = 1; ogen <= 6; ogen++) {
+      if (telAantal(ogen) >= n) {
+        return berekenSom();
+      }
+    }
+    return 0;
+  }
+  
+  /**
+   * Bepaalt de score voor de categorie full house.
+   * @return 25 als er een full house is gegooid, anders 0
+   */
+  private int fullHouseScore() {
+    for (int i=1; i <= 6; i++) {
+      for (int j = 1; j <= 6; j++) {
+        if (telAantal(i) == 2 && telAantal(j) == 3) {
+          return 25;
+        }
+      }
+    }
+    return 0;
+  }
+  
+  /**
+   * Bepaalt de score in de categorie kleine straat
+   * @return 30 als er een kleine straat is gegooid óf een yahtzee die
+   *         als straat gescoord mag worden, anders 0
+   */
+  private int kleineStraatScore() {
+    if (heeftStraat(4, 1) || heeftStraat(4, 2) || heeftStraat(4, 3) || yahtzeeAlsJoker) {
+      return 30;
+    } else {
+      return 0;
+    }     
+  }
+  
+  /**
+   * Bepaalt de score in de categorie grote straat
+   * @return 40 als er een grote straatt is gegooid óf een yahtzee die
+   *         als straat gescoord mag worden, anders 0
+   */
+  private int groteStraatScore() {
+    if (heeftStraat(5, 1) || heeftStraat(5, 2) || yahtzeeAlsJoker) {
+      return 40;
+    } else {
+      return 0;
+    }
+  }
+  
+  /**
+   * Hulpmethode voor het tellen van het aantal keer dat een bepaalde
+   * waarde is gegooid
+   * @param waarde  de waarde die geteld wordt
+   * @return  het aantal keren dat de waarde in de worp voorkomt
+   */
+  private int telAantal(int waarde) {
+    int aantal = 0;
+    for (Dobbelsteen steen: stenen) {
+      if (steen.getOgen() == waarde) {
+        aantal++;
+      }
+    }
+    return aantal;
+  }
+  
+  /**
+   * Hulpmethode die de som van de waarden in de worp berekent.
+   * @return  de som van alle waarden in de worp
+   */
+  private int berekenSom() {
+    int som = 0;
+    for (int i = 0; i < 5; i++) {
+      som = som + stenen[i].getOgen();
+    }
+    return som;
+  }
+
+  /**
+   * Hulpmethode die onderzoekt of één specifieke straat is gegooid
+   * @param aantal  de lengte van de onderzochte straat (4 of 5)
+   * @param begin  de laagste waarde in de onderzochte straat (1, 2 of 3)
+   * @return true als de straat wordt gevonden, anders false
+   */
+  private boolean heeftStraat(int aantal, int begin) {
+    for (int ogen = begin; ogen < begin + aantal; ogen++) {
+      if (telAantal(ogen) == 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+}

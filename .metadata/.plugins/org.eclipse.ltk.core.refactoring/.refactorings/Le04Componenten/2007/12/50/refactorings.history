@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<session version="1.0">
+<refactoring comment="Rename method 'VoorbeeldFrame.myInit()' to 'mijnInit'&#13;&#10;- Original element: 'VoorbeeldFrame.myInit()'&#13;&#10;- Renamed element: 'VoorbeeldFrame.mijnInit()'&#13;&#10;- Update references to refactored element" delegate="false" deprecate="true" description="Rename method 'myInit'" flags="589826" id="org.eclipse.jdt.ui.rename.method" input="/&lt;{VoorbeeldFrame.java[VoorbeeldFrame~myInit" name="mijnInit" references="true" stamp="1197562912171" version="1.0"/>
+</session>

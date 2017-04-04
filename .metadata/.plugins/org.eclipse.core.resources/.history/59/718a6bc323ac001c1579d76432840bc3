@@ -1,0 +1,287 @@
+package yahtzee;
+
+/**
+ * De klasse Yahtzee representeert één spel Yahtzee voor één speler.
+ * Yahtzee wordt gespeeld met vijf dobbelstenen. 
+ * Een beurt begint met het gooien van de dobbelstenen. De speler mag daarna
+ * een tweede en derde keer gooien met slechts een deel van de dobbelstenen;
+ * de andere blijven dan liggen. De beurt wordt afgerond door één uit dertien
+ * mogelijke categorieën te kiezen; de speler krijgt dan de score in die
+ * categorie van de huidige beurt. Een eenmaal gekozen categorie
+ * kan niet opnieuw gekozen worden; het spel duurt dus precies dertien beurten.
+ * <P>
+ * De dertien categorieën en hun scores zijn als volgt:
+ * <UL>
+ *<LI>enen: het aantal gegooide enen</LI>
+ *<LI>tweeën: twee keer het aantal gegooide tweeën</LI> 
+ *<LI>drieën: drie keer het aantal gegooide drieën</LI>
+ *<LI>vieren: vier keer het aantal gegooide vieren</LI>
+ *<LI>vijven: vijf keer het aantal gegooide vijven</LI>
+ *<LI>zessen: zes keer het aantal gegooide zessen</LI>
+ *<LI>3 dezelfde: als minstens drie keer dezelfde waarde is gegooid, 
+ *                de som van alle ogen in de beurt; anders 0.</LI>
+ *<LI>carré: als minstens vier keer dezelfde waarde is gegooid, 
+ *                de som van alle ogen in de beurt; anders 0.</LI>
+ *<LI>full house:  als met drie dobbelstenen dezelfde waarde is gegooid en ook
+ *                met de twee andere 25, anders 0. <BR>
+ *                Een voorbeeld van een full house is (2, 2, 5, 2, 5)</LI>
+ *<LI>kleine straat: als er minstens vier opeenvolgende waarden zijn gegooid 30,
+ *                   anders 0. <BR>
+ *                   Een voorbeeld van een small straight is (3, 3, 2, 1, 4)</LI>
+ *<LI>grote strat: als er vijf opeenvolgende waarden zijn gegooid 40, anders 0.<BR>
+ *                   Een voorbeeld van een large straight is (3, 6, 2, 5, 4)</LI>
+ *<LI>yahtzee: als vijf keer dezelfde waarde is gegooid dan 50, anders 0</LI>
+ *<LI>chance: de som van alle ogen in de beurt</LI>
+ *</UL>   
+ * Worpen scoren in meer dan één categorie hoger dan 0; de beurt (3, 5, 6, 4, 6) 
+ * bijvoorbeeld scoort in drieën, vieren, vijven, zessen, kleine straat en chance.
+ * Iedere grote straat kan ook gescoord worden als kleine straat, en iedere yahtzee kan 
+ * ook gescoord worden als full house, 3 dezelfde en carré.
+ * <P>  
+ * Verder zijn er nog twee bonusregels.
+ * <UL>
+ * <LI> Er wordt een bonus van 35 punten gegeven als aan het eind van het spel
+ *      de som van de scores in de eerste zes categorieën tenminste 63 is.</LI>
+ * <LI> Er wordt een bonus van 100 punten gegeven voor elke tweede en volgende
+ *      yahtzee aan het eind van een beurt, mits de eerste ook als yahtzee gescoord 
+ *      was (er moet dus al score 50 in de categorie yahtzee staan).</LI>
+ * </UL>   
+ * Tot slot is er nog een speciale yahtzee-regel:<BR>
+ *   Als er een yahtzee is gegooid terwijl zowel de categorie yahtzee als de 
+ *   overeenkomstige cijfercategorie (bv. vijven bij een yahtzee van vijven) al 
+ *   zijn gescoord, dan mag de yahtzee ook geteld worden als een kleine of grote straat  
+ *   Deze regel geldt ook als de categorie yahtzee een score 0 heeft
+ *   (was gekozen terwijl er geen yahtzee was gemaakt). 
+ *     
+ * @author Open Universiteit Nederland
+ */
+public class Yahtzee {
+  /**
+   * Constante voor de categorie ones
+   */
+  public static final int ENEN = 0;
+  
+  /**
+   * Constante voor de categorie twos
+   */
+  public static final int TWEEEN = 1;
+  
+  /**
+   * Constante voor de categorie threes
+   */
+  public static final int DRIEEN = 2;
+  
+  /**
+   * Constante voor de categorie fours
+   */
+  public static final int VIEREN = 3;
+  
+  /**
+   * Constante voor de categorie fives
+   */
+  public static final int VIJVEN = 4;
+  
+  /**
+   * Constante voor de categorie sixes
+   */
+  public static final int ZESSEN = 5;
+  
+  /**
+   * Constante voor de categorie three of a kind
+   */
+  public static final int DRIEDEZELFDE = 6;
+  
+  /**
+   * Constante voor de categorie four of a kind
+   */
+  public static final int CARRE = 7;
+  
+  /**
+   * Constante voor de categorie full house
+   */
+  public static final int FULLHOUSE = 8;
+  
+  /**
+   * Constante voor de categorie small straight
+   */
+  public static final int KLEINESTRAAT = 9;
+  
+  /**
+   * Constante voor de categorie large straight
+   */
+  public static final int GROTESTRAAT = 10;
+  
+  /**
+   * Constante voor de categorie yahtzee
+   */
+  public static final int YAHTZEE = 11;
+  
+  /**
+   * Constante voor de categorie chance
+   */
+  public static final int CHANCE = 12;
+ 
+  /**
+   * Constante voor het maximale aantal worpen
+   */
+  static final int MAXAANTALWORPEN = 3;
+  
+  // attributen
+  
+  /**
+   * De scores voor de 13 categorieën
+   */
+  private int[] score = new int[13];
+  
+  /**
+   * Voor elke categorie wordt bijgehouden of deze al is gescoord
+   */
+  private boolean[] gescoord = new boolean[13];
+  
+  /**
+   * De huidige beurt. 
+   */
+  private Beurt beurt = new Beurt();
+
+  
+  /**
+   * De totale score
+   */
+  private int totaalScore = 0;
+  
+  // public methoden
+  
+  /**
+   * Werpt indien dat op dit punt van het spel geoorloofd is, de dobbelstenen,
+   * waarbij mogelijk een deel hun waarde behoudt (hold).
+   * Als het maximaal aantal worpen in de huidige beurt al was bereikt, heeft
+   * deze methode geen effect.
+   */
+  public void werp(boolean[] hold) {
+      beurt.werp(hold);
+  }
+  
+  /**
+   * Bepaalt of er nog gegooid mag worden.
+   * @return true als er nog een keer gegooid mag worden in deze
+   *         beurt, anders false
+   */
+  public boolean magWerpen() {
+    return (beurt.getKeerGeworpen() < MAXAANTALWORPEN);
+  }
+  
+  /**
+   * Bepaalt of in deze situatie categorie i gekozen
+   * mag worden
+   * @param i de te kiezen categorie
+   * @return true als er in deze beurt al een keer geworpen is
+   *         en de gegeven categorie nog niet is gescoord
+   */
+  public boolean magKiezen(int i) {
+    return (beurt.getKeerGeworpen() > 0 && !gescoord[i]);
+  }
+  
+  /**
+   * Levert de waarden van de huidige worp van vijf dobbelstenen
+   */
+  public int[] getOgen() {
+    return beurt.getOgen();
+  }
+  
+  /**
+   * Verwerkt de keuze van de i-de categorie. Eerst wordt gecontroleerd
+   * of er een yahtzee is geworpen en zo ja, of die tot een bonus
+   * of tot extra scoremogelijkheden leidt. De score wordt berekend
+   * en bij de totaalscore opgeteld. Als dit de laatste categorie was,
+   * wordt ook een eventuele bonus over de cijfercategorieën (som >= 63) 
+   * bijgeteld.
+   * @param i  het nummer van de gescoorde categorie
+   */
+  public void kies(int i) {
+    if (magKiezen(i)) {
+      controleerYahtzee();
+      gescoord[i] = true;
+      score[i] = beurt.berekenScore(i);   
+      totaalScore = totaalScore + score[i];
+      if (spelKlaar()) {
+        geefCijferBonus();
+      } else {
+        beurt = new Beurt();
+      }
+    }
+  }
+  
+  /**
+   * Levert de score van de i-de categorie
+   */
+  public int getScore(int i) {
+    return score[i];
+  }
+  
+  /**
+   * Levert de totaalscore
+   */
+  public int getTotaalScore() {
+    return totaalScore;
+  }
+  
+  /**
+   * Levert true als alle categorieën zijn gescoord en anders false
+   */
+  public boolean spelKlaar() {
+    for (boolean b: gescoord) {
+      if (!b) {
+        return false;
+      }
+    }
+    return true;
+  } 
+  
+  // private methoden
+   
+  /**
+   * Deze methode past de regels toe voor het gooien van een tweede of
+   * volgende Yahtzee. Deze regels zijn:
+   * - Als er een yahtzee is gegooid en de categorie YAHTZEE heeft al een score
+   * (0 of 50) en de overeenkomstige cijfercategorie heeft al een
+   * score, dan mag de yahtzee geteld worden als een full house, een small straight
+   * of een large straight.
+   * - Als er een yahtzee is gegooid en de categorie YAHTZEE heeft al een score 50,
+   * dan is er een bonus van 100 punten. 
+   *
+   */
+  private void controleerYahtzee() {
+    // is er yahtzee gegooid terwijl yahtzee al was gescoord?
+    if (beurt.yahtzeeScore() == 50 && gescoord[YAHTZEE]) {
+      // als de betreffende cijfercategorie ook al is gescoord,
+      // dan mag de yahtzee als joker worden gebruikt: alle
+      // zeven hoogste categorieën zijn van toepassing
+      int cijfer = beurt.getOgen()[0];
+      if (gescoord[cijfer-1]) { 
+        beurt.setYahtzeeAlsJoker();
+      }
+      // Als de yahtzeescore 50 was, dan wordt de totaalscore 
+      // met 100 verhoogd
+      if (score[YAHTZEE] == 50) { 
+        totaalScore = totaalScore + 100;
+      }
+    }
+  }
+  
+  /**
+   * Als de som van de scores in de eerste zes categorieën 
+   * (ONES, ..., SIXES) 63 of hoger is, wordt de totaalscore 
+   * met 35 verhoogd.
+   */
+  private void geefCijferBonus() {
+    int somCijferScores = 0;
+    for (int i = 0; i < 6; i++) {
+      somCijferScores = somCijferScores + score[i];
+    }
+    if (somCijferScores >= 63) {
+      totaalScore = totaalScore + 35;
+    }
+  }
+  
+  
+}

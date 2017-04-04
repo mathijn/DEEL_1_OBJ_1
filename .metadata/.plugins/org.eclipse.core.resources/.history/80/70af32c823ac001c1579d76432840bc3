@@ -1,0 +1,911 @@
+package yahtzeegui;
+
+import javax.swing.JPanel;
+import javax.swing.JApplet;
+import javax.swing.JTextField;
+import java.awt.Rectangle;
+import javax.swing.JButton;
+
+import yahtzee.Yahtzee;
+import javax.swing.JLabel;
+
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Color;
+
+/**
+ * Grafische gebruikersinterface in de vorm van een applet
+ * voor het Yahtzee-spel.
+ * Deze interface is gemaakt nmet behulp van de Visual Editor van
+ * Eclipse, met de mogelijkheden aangereikt in de cursus Objectgeorënteerd
+ * programmeren met Java 1. Elk veld en elke knop zijn apart geplaatst.
+ *
+ * @author Medewerker OUNL
+ */
+public class YahtzeeAppletVersie1 extends JApplet {
+  //attributen
+  
+  /**
+   * Het huidige yahtzee-spel
+   */
+  private Yahtzee yahtzee = new Yahtzee();  //  @jve:decl-index=0:
+  
+  /**
+   * Geeft aan welke dobbelstenen in de interface zijn
+   * vastgezet: hold[i] = true als de i-de dobbelsteen
+   * is vastgezet.
+   */
+  private boolean[] hold = new boolean[5];
+ 
+  private JPanel jContentPane = null;
+  private JButton gooiKnop = null;
+  private JButton enenKnop = null;
+  private JButton tweeenKnop = null;
+  private JButton drieenKnop = null;
+  private JButton vierenKnop = null;
+  private JButton vijvenKnop = null;
+  private JButton zessenKnop = null;
+  private JButton drieDezelfdeKnop = null;
+  private JButton carreKnop = null;
+  private JButton fullHouseKnop = null;
+  private JButton kleineStraatKnop = null;
+  private JButton groteStraatKnop = null;
+  private JButton yahtzeeKnop = null;
+  private JButton chanceKnop = null;
+  private JTextField dobbel0Veld = null;
+  private JTextField dobbel1Veld = null;
+  private JTextField dobbel2Veld = null;
+  private JTextField dobbel3Veld = null;
+  private JTextField dobbel4Veld = null;
+  private JTextField enenVeld = null;
+  private JTextField tweeenVeld = null;
+  private JTextField drieenVeld = null;
+  private JTextField vierenVeld = null;
+  private JTextField vijvenVeld = null;
+  private JTextField zessenVeld = null;
+  private JTextField drieDezelfdeVeld = null;
+  private JTextField carreVeld = null;
+  private JTextField fullHouseVeld = null;
+  private JTextField kleineStraatveld = null;
+  private JTextField groteStraatVeld = null;
+  private JTextField yahtzeeVeld = null;
+  private JTextField chanceVeld = null;
+  private JButton nieuwSpelKnop = null;
+  private JTextField totaalVeld = null;
+  private JLabel totaalLabel = null;
+  
+  /**
+   * This is the xxx default constructor
+   */
+  public YahtzeeAppletVersie1() {
+    super();
+  }
+
+  /**
+   * This method initializes this
+   * 
+   */
+  public void init() {
+    this.setSize(300, 400);
+    this.setContentPane(getJContentPane());
+  }
+  
+  // event handlers
+  
+  /**
+   * Event handler voor het klikken op de knop Gooi. Vraagt het
+   * yahtzee-spel een worp te doen met de stenen die niet vast staan.
+   * Toont de gegooide waarden in de dobbelVelden.
+   */
+  private void gooiKnopAction() {
+    yahtzee.werp(hold);
+    // disable gooiKnop als het maximum aantal worpen bereikt is
+    if (!yahtzee.magWerpen()) {
+        gooiKnop.setEnabled(false);
+    } 
+    // toon de ogen in de dobllevelden
+    int[] ogen = yahtzee.getOgen();
+    dobbel0Veld.setText(ogen[0] + ""); 
+    dobbel1Veld.setText(ogen[1] + ""); 
+    dobbel2Veld.setText(ogen[2] + ""); 
+    dobbel3Veld.setText(ogen[3] + ""); 
+    dobbel4Veld.setText(ogen[4] + ""); 
+  }
+  
+  /**
+   * Event handler voor klikken op een gegeven dobbelsteenveld.
+   * De status van de steen wijzigt daardoor van hold in niet-hold of
+   * omgekeerd. 
+   * @param i  het nummer van de dobbelsteen 
+   * @param veld  het bijbehorende dobbelVeld
+   */
+  private void dobbelVeldAction(int i, JTextField veld) {
+    if (!hold[i]) {
+      hold[i] = true;
+      veld.setBackground(Color.PINK);
+    } else {
+      hold[i] = false;
+      veld.setBackground(Color.WHITE);
+    }
+  }
+  
+  /**
+   * Event handler voor het scoren van een categorie. De keuze wordt
+   * doorgegeven aan het yahtzeespel, de score en de nieuwe totaalscore
+   * worden getoond en de gekozen knop wordt disabled. 
+   * Omdat de beurt hiermee is afgelopen, worden ook de dobbelsteenvelden geleegd 
+   * en de gooiKnop weer enabled (tenzij het spel is afgelopen).
+   * @param keuze  het nummer van de gekozen categorie
+   * @param scoreVeld  het bijbehorende scoreveld 
+   * @param keuzeKnop  de bijbehorende knop
+   */
+  private void keuzeKnopAction(int keuze, JTextField scoreVeld, JButton keuzeKnop) {
+    if (yahtzee.magKiezen(keuze)) {
+      yahtzee.kies(keuze);
+      scoreVeld.setText(yahtzee.getScore(keuze) + "");
+      totaalVeld.setText(yahtzee.getTotaalScore() + "");   
+      resetDobbelstenen();
+      keuzeKnop.setEnabled(false);
+    }
+  }
+
+  /**
+   * Event handler voor klikken op Nieuw spel.
+   * Er wordt een nieuw Yahtzee-spel gecreëerd en de gui
+   * wordt in de begintoestand teruggebracht
+   */
+  private void nieuwSpelKnopAction() {
+    yahtzee = new Yahtzee();
+    hold = new boolean[5];
+    resetComponenten();
+  }
+  
+  // private hulpmethoden
+  
+  /**
+   * Hulpmethode voor het legen van de dobbelvelden,
+   * het enablen van de gooiKnop als het spel nog niet is
+   * afgelopen en het disablen als dat wel het geval is.
+   */
+  private void resetDobbelstenen() {
+    dobbel0Veld.setText("");
+    dobbel0Veld.setBackground(Color.WHITE);
+    dobbel1Veld.setText("");
+    dobbel1Veld.setBackground(Color.WHITE);
+    dobbel2Veld.setText("");
+    dobbel2Veld.setBackground(Color.WHITE);
+    dobbel3Veld.setText("");
+    dobbel3Veld.setBackground(Color.WHITE);
+    dobbel4Veld.setText("");
+    dobbel4Veld.setBackground(Color.WHITE);
+    if (yahtzee.spelKlaar()) {
+      gooiKnop.setEnabled(false);
+    } else {
+      gooiKnop.setEnabled(true);
+    }
+    hold = new boolean[5];
+  }
+  
+  /**
+   * Hulpmethode die alle velden in de interface leeg maakt 
+   * en alle knoppen weer enabled.
+   * Deze methode kan met alleen de kennis uit OPiJ 1 niet
+   * geschreven worden.
+   */
+  private void resetComponenten() {
+    // Doe voor alle componenten in de contentPane
+    for (Component comp: jContentPane.getComponents()) {
+      // als het een tekstveld is, maak de inhoud leeg en de achtergrond wit
+      if (comp instanceof JTextField) {
+        // setText() kan niet worden aangeroepen op een variabele
+        // van type Component; we moeten dus bevestigen dat het
+        // echt een JTextField is. Zie voor uitleg de cursus OPiJ2. 
+        JTextField veld = (JTextField)comp;
+        veld.setText("");
+        veld.setBackground(Color.WHITE);
+      }
+      // als het een knop is, enable deze dan
+      else if (comp instanceof JButton) {
+        comp.setEnabled(true);
+      }
+    }
+  }
+
+  // Hier beginnen de gegenereerde methoden
+  /**
+   * This method initializes jContentPane
+   * 
+   * @return javax.swing.JPanel
+   */
+  private JPanel getJContentPane() {
+    if (jContentPane == null) {
+      totaalLabel = new JLabel();
+      totaalLabel.setBounds(new Rectangle(17, 291, 67, 23));
+      totaalLabel.setText("TOTAAL");
+      jContentPane = new JPanel();
+      jContentPane.setLayout(null);
+      jContentPane.add(getGooiKnop(), null);
+      jContentPane.add(getEnenKnop(), null);
+      jContentPane.add(getTweeenKnop(), null);
+      jContentPane.add(getDrieenKnop(), null);
+      jContentPane.add(getVierenKnop(), null);
+      jContentPane.add(getVijvenKnop(), null);
+      jContentPane.add(getZessenKnop(), null);
+      jContentPane.add(getDrieDezelfdeKnop(), null);
+      jContentPane.add(getCarreKnop(), null);
+      jContentPane.add(getFullHouseKnop(), null);
+      jContentPane.add(getKleineStraatKnop(), null);
+      jContentPane.add(getGroteStraatKnop(), null);
+      jContentPane.add(getYahtzeeKnop(), null);
+      jContentPane.add(getChanceKnop(), null);
+      jContentPane.add(getDobbel0Veld(), null);
+      jContentPane.add(getDobbel1Veld(), null);
+      jContentPane.add(getDobbel2Veld(), null);
+      jContentPane.add(getDobbel3Veld(), null);
+      jContentPane.add(getDobbel4Veld(), null);      
+      jContentPane.add(getEnenVeld(), null);
+      jContentPane.add(getTweeenVeld(), null);
+      jContentPane.add(getDrieenVeld(), null);
+      jContentPane.add(getVierenVeld(), null);
+      jContentPane.add(getVijvenVeld(), null);
+      jContentPane.add(getZessenVeld(), null);
+      jContentPane.add(getDrieDezelfdeVeld(), null);
+      jContentPane.add(getCarreVeld(), null);
+      jContentPane.add(getFullHouseVeld(), null);
+      jContentPane.add(getKleineStraatveld(), null);
+      jContentPane.add(getGroteStraatVeld(), null);
+      jContentPane.add(getYahtzeeVeld(), null);
+      jContentPane.add(getChanceVeld(), null);
+      jContentPane.add(getNieuwSpelKnop(), null);
+      jContentPane.add(getTotaalVeld(), null);
+      jContentPane.add(totaalLabel, null);
+    }
+    return jContentPane;
+  }
+
+  /**
+   * This method initializes gooiKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getGooiKnop() {
+    if (gooiKnop == null) {
+      gooiKnop = new JButton();
+      gooiKnop.setBounds(new Rectangle(96, 75, 99, 34));
+      gooiKnop.setText("Gooi");
+      gooiKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          gooiKnopAction();
+        }
+      });
+    }
+    return gooiKnop;
+  }
+
+  // De volgende 13 methoden horen bij de knoppen bij alle
+  // categorieën. Ze roepen allemaal dezelfde event handler
+  // aan, waaraan naast de gekozen categorie ook het juiste
+  // tekstveld en de juiste knop wordt meegeven.
+  
+  /**
+   * This method initializes enenKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getEnenKnop() {
+    if (enenKnop == null) {
+      enenKnop = new JButton();
+      enenKnop.setBounds(new Rectangle(16, 133, 92, 23));
+      enenKnop.setText("enen");
+      enenKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.ENEN, enenVeld, enenKnop);
+        }
+      });
+    }
+    return enenKnop;
+  }
+
+  /**
+   * This method initializes tweeenKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getTweeenKnop() {
+    if (tweeenKnop == null) {
+      tweeenKnop = new JButton();
+      tweeenKnop.setBounds(new Rectangle(16, 160, 92, 23));
+      tweeenKnop.setText("tweeën");
+      tweeenKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.TWEEEN, tweeenVeld, tweeenKnop);
+        }
+      });
+    }
+    return tweeenKnop;
+  }
+
+  /**
+   * This method initializes drieenKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getDrieenKnop() {
+    if (drieenKnop == null) {
+      drieenKnop = new JButton();
+      drieenKnop.setBounds(new Rectangle(16, 186, 92, 23));
+      drieenKnop.setText("drieën");
+      drieenKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.DRIEEN, drieenVeld, drieenKnop);
+        }
+      });
+    }
+    return drieenKnop;
+  }
+
+  /**
+   * This method initializes vierenKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getVierenKnop() {
+    if (vierenKnop == null) {
+      vierenKnop = new JButton();
+      vierenKnop.setBounds(new Rectangle(16, 212, 92, 23));
+      vierenKnop.setText("vieren");
+      vierenKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.VIEREN, vierenVeld, vierenKnop);
+        }
+      });
+    }
+    return vierenKnop;
+  }
+
+  /**
+   * This method initializes vijvenKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getVijvenKnop() {
+    if (vijvenKnop == null) {
+      vijvenKnop = new JButton();
+      vijvenKnop.setBounds(new Rectangle(16, 238, 92, 23));
+      vijvenKnop.setText("vijven");
+      vijvenKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.VIJVEN, vijvenVeld, vijvenKnop);
+        }
+      });
+    }
+    return vijvenKnop;
+  }
+
+  /**
+   * This method initializes zessenKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getZessenKnop() {
+    if (zessenKnop == null) {
+      zessenKnop = new JButton();
+      zessenKnop.setBounds(new Rectangle(16, 264, 92, 23));
+      zessenKnop.setText("zessen");
+      zessenKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.ZESSEN, zessenVeld, zessenKnop);
+        }
+      });
+    }
+    return zessenKnop;
+  }
+
+  /**
+   * This method initializes drieDezelfdeKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getDrieDezelfdeKnop() {
+    if (drieDezelfdeKnop == null) {
+      drieDezelfdeKnop = new JButton();
+      drieDezelfdeKnop.setBounds(new Rectangle(194, 133, 92, 23));
+      drieDezelfdeKnop.setText("3 dezelfde");
+      drieDezelfdeKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.DRIEDEZELFDE, drieDezelfdeVeld, drieDezelfdeKnop);
+        }
+      });
+    }
+    return drieDezelfdeKnop;
+  }
+
+  /**
+   * This method initializes carreKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getCarreKnop() {
+    if (carreKnop == null) {
+      carreKnop = new JButton();
+      carreKnop.setBounds(new Rectangle(194, 160, 92, 23));
+      carreKnop.setText("carré");
+      carreKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.CARRE, carreVeld, carreKnop);
+        }
+      });
+    }
+    return carreKnop;
+  }
+
+  /**
+   * This method initializes fullHouseKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getFullHouseKnop() {
+    if (fullHouseKnop == null) {
+      fullHouseKnop = new JButton();
+      fullHouseKnop.setBounds(new Rectangle(194, 186, 92, 23));
+      fullHouseKnop.setText("full house");
+      fullHouseKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.FULLHOUSE, fullHouseVeld, fullHouseKnop);
+        }
+      });
+    }
+    return fullHouseKnop;
+  }
+
+  /**
+   * This method initializes kleineStraatKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getKleineStraatKnop() {
+    if (kleineStraatKnop == null) {
+      kleineStraatKnop = new JButton();
+      kleineStraatKnop.setBounds(new Rectangle(194, 212, 92, 23));
+      kleineStraatKnop.setText("kleine str.");
+      kleineStraatKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.KLEINESTRAAT, kleineStraatveld, kleineStraatKnop);
+        }
+      });
+    }
+    return kleineStraatKnop;
+  }
+
+  /**
+   * This method initializes groteStraatKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getGroteStraatKnop() {
+    if (groteStraatKnop == null) {
+      groteStraatKnop = new JButton();
+      groteStraatKnop.setBounds(new Rectangle(194, 238, 92, 23));
+      groteStraatKnop.setText("grote str.");
+      groteStraatKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.GROTESTRAAT, groteStraatVeld, groteStraatKnop);
+        }
+      });
+    }
+    return groteStraatKnop;
+  }
+
+  /**
+   * This method initializes yahtzeeKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getYahtzeeKnop() {
+    if (yahtzeeKnop == null) {
+      yahtzeeKnop = new JButton();
+      yahtzeeKnop.setBounds(new Rectangle(194, 264, 92, 23));
+      yahtzeeKnop.setText("YAHTZEE!");
+      yahtzeeKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.YAHTZEE, yahtzeeVeld, yahtzeeKnop);
+        }
+      });
+    }
+    return yahtzeeKnop;
+  }
+
+  /**
+   * This method initializes chanceKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getChanceKnop() {
+    if (chanceKnop == null) {
+      chanceKnop = new JButton();
+      chanceKnop.setBounds(new Rectangle(194, 290, 92, 23));
+      chanceKnop.setText("chance");
+      chanceKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          keuzeKnopAction(Yahtzee.CHANCE, chanceVeld, chanceKnop);
+        }
+      });
+    }
+    return chanceKnop;
+  }
+
+  // De volgende vijf methoden horen bij de dobbelvelden.
+  // Ze roepen allemaal dezelfde event handler
+  // aan, waaraan naast het nummer van de dobbelsteen
+  // ook het veld zelf wordt meegegeven.
+  
+  /**
+   * This method initializes dobbel0Veld    
+   *    
+   * @return javax.swing.JTextField     
+   */
+  private JTextField getDobbel0Veld() {
+    if (dobbel0Veld == null) {
+      dobbel0Veld = new JTextField();
+      dobbel0Veld.setBounds(new Rectangle(8, 16, 50, 50));
+      dobbel0Veld.setFont(new Font("Dialog", Font.BOLD, 24));
+      dobbel0Veld.setForeground(Color.BLUE);
+      dobbel0Veld.setBackground(Color.WHITE);   
+      dobbel0Veld.setEditable(false);
+      dobbel0Veld.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mousePressed(java.awt.event.MouseEvent e) {
+          dobbelVeldAction(0, dobbel0Veld);
+        }
+      });
+    }
+    return dobbel0Veld;
+  }
+  
+  /**
+   * This method initializes dobbel1Veld    
+   *    
+   * @return javax.swing.JTextField     
+   */
+  private JTextField getDobbel1Veld() {
+    if (dobbel1Veld == null) {
+      dobbel1Veld = new JTextField();
+      dobbel1Veld.setBounds(new Rectangle(66, 16, 50, 50));
+      dobbel1Veld.setFont(new Font("Dialog", Font.BOLD, 24));
+      dobbel1Veld.setForeground(Color.BLUE);
+      dobbel1Veld.setBackground(Color.WHITE);   
+      dobbel1Veld.setEditable(false);
+      dobbel1Veld.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mousePressed(java.awt.event.MouseEvent e) {
+          dobbelVeldAction(1, dobbel1Veld);
+        }
+      });
+    }
+    return dobbel1Veld;
+  }
+
+  /**
+   * This method initializes dobbel2Veld    
+   *    
+   * @return javax.swing.JTextField     
+   */
+  private JTextField getDobbel2Veld() {
+    if (dobbel2Veld == null) {
+      dobbel2Veld = new JTextField();
+      dobbel2Veld.setBounds(new Rectangle(124, 16, 50, 50));
+      dobbel2Veld.setFont(new Font("Dialog", Font.BOLD, 24));
+      dobbel2Veld.setForeground(Color.BLUE);
+      dobbel2Veld.setBackground(Color.WHITE);   
+      dobbel2Veld.setEditable(false);
+      dobbel2Veld.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mousePressed(java.awt.event.MouseEvent e) {
+          dobbelVeldAction(2, dobbel2Veld);
+        }
+      });
+    }
+    return dobbel2Veld;
+  }
+
+  /**
+   * This method initializes dobbel3Veld    
+   *    
+   * @return javax.swing.JTextField     
+   */
+  private JTextField getDobbel3Veld() {
+    if (dobbel3Veld == null) {
+      dobbel3Veld = new JTextField();
+      dobbel3Veld.setBounds(new Rectangle(182, 16, 50, 50));
+      dobbel3Veld.setFont(new Font("Dialog", Font.BOLD, 24));
+      dobbel3Veld.setForeground(Color.BLUE);
+      dobbel3Veld.setBackground(Color.WHITE);   
+      dobbel3Veld.setEditable(false);
+      dobbel3Veld.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mousePressed(java.awt.event.MouseEvent e) {
+          dobbelVeldAction(3, dobbel3Veld);
+        }
+      });
+    }
+    return dobbel3Veld;
+  }
+
+  /**
+   * This method initializes dobbel4Veld    
+   *    
+   * @return javax.swing.JTextField     
+   */
+  private JTextField getDobbel4Veld() {
+    if (dobbel4Veld == null) {
+      dobbel4Veld = new JTextField();
+      dobbel4Veld.setBounds(new Rectangle(240, 16, 50, 50));
+      dobbel4Veld.setFont(new Font("Dialog", Font.BOLD, 24));
+      dobbel4Veld.setForeground(Color.BLUE);
+      dobbel4Veld.setBackground(Color.WHITE);   
+      dobbel4Veld.setEditable(false);
+      dobbel4Veld.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mousePressed(java.awt.event.MouseEvent e) {
+          dobbelVeldAction(4, dobbel4Veld);
+        }
+      });
+    }
+    return dobbel4Veld;
+  }
+  
+  /**
+   * This method initializes enenVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getEnenVeld() {
+    if (enenVeld == null) {
+      enenVeld = new JTextField();
+      enenVeld.setBounds(new Rectangle(114, 133, 28, 25));
+      enenVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+      enenVeld.setForeground(Color.blue);
+      enenVeld.setEnabled(true);
+      enenVeld.setEditable(false);
+      enenVeld.setBackground(Color.white);
+      enenVeld.setText("");
+    }
+    return enenVeld;
+  }
+
+  /**
+   * This method initializes tweeenVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getTweeenVeld() {
+    if (tweeenVeld == null) {
+      tweeenVeld = new JTextField();
+      tweeenVeld.setBounds(new Rectangle(114, 160, 28, 23));
+      tweeenVeld.setForeground(Color.blue);
+      tweeenVeld.setEditable(false);
+      tweeenVeld.setBackground(Color.white);
+      tweeenVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return tweeenVeld;
+  }
+
+  /**
+   * This method initializes drieenVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getDrieenVeld() {
+    if (drieenVeld == null) {
+      drieenVeld = new JTextField();
+      drieenVeld.setBounds(new Rectangle(114, 186, 28, 21));
+      drieenVeld.setForeground(Color.blue);
+      drieenVeld.setEditable(false);
+      drieenVeld.setBackground(Color.white);
+      drieenVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return drieenVeld;
+  }
+
+  /**
+   * This method initializes vierenVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getVierenVeld() {
+    if (vierenVeld == null) {
+      vierenVeld = new JTextField();
+      vierenVeld.setBounds(new Rectangle(114, 212, 28, 24));
+      vierenVeld.setForeground(Color.blue);
+      vierenVeld.setEditable(false);
+      vierenVeld.setBackground(Color.white);
+      vierenVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return vierenVeld;
+  }
+
+  /**
+   * This method initializes vijvenVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getVijvenVeld() {
+    if (vijvenVeld == null) {
+      vijvenVeld = new JTextField();
+      vijvenVeld.setBounds(new Rectangle(114, 238, 28, 21));
+      vijvenVeld.setForeground(Color.blue);
+      vijvenVeld.setEditable(false);
+      vijvenVeld.setBackground(Color.white);
+      vijvenVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return vijvenVeld;
+  }
+
+  /**
+   * This method initializes zessenVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getZessenVeld() {
+    if (zessenVeld == null) {
+      zessenVeld = new JTextField();
+      zessenVeld.setBounds(new Rectangle(114, 264, 28, 23));
+      zessenVeld.setForeground(Color.blue);
+      zessenVeld.setEditable(false);
+      zessenVeld.setBackground(Color.white);
+      zessenVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return zessenVeld;
+  }
+
+  /**
+   * This method initializes drieDezelfdeVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getDrieDezelfdeVeld() {
+    if (drieDezelfdeVeld == null) {
+      drieDezelfdeVeld = new JTextField();
+      drieDezelfdeVeld.setBounds(new Rectangle(163, 133, 28, 25));
+      drieDezelfdeVeld.setForeground(Color.blue);
+      drieDezelfdeVeld.setEditable(false);
+      drieDezelfdeVeld.setBackground(Color.white);
+      drieDezelfdeVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return drieDezelfdeVeld;
+  }
+
+  /**
+   * This method initializes carreVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getCarreVeld() {
+    if (carreVeld == null) {
+      carreVeld = new JTextField();
+      carreVeld.setBounds(new Rectangle(163, 160, 28, 25));
+      carreVeld.setForeground(Color.blue);
+      carreVeld.setEditable(false);
+      carreVeld.setBackground(Color.white);
+      carreVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return carreVeld;
+  }
+
+  /**
+   * This method initializes fullHouseVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getFullHouseVeld() {
+    if (fullHouseVeld == null) {
+      fullHouseVeld = new JTextField();
+      fullHouseVeld.setBounds(new Rectangle(163, 186, 28, 25));
+      fullHouseVeld.setForeground(Color.blue);
+      fullHouseVeld.setEditable(false);
+      fullHouseVeld.setBackground(Color.white);
+      fullHouseVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return fullHouseVeld;
+  }
+
+  /**
+   * This method initializes kleineStraatveld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getKleineStraatveld() {
+    if (kleineStraatveld == null) {
+      kleineStraatveld = new JTextField();
+      kleineStraatveld.setBounds(new Rectangle(163, 212, 28, 25));
+      kleineStraatveld.setForeground(Color.blue);
+      kleineStraatveld.setEditable(false);
+      kleineStraatveld.setBackground(Color.white);
+      kleineStraatveld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return kleineStraatveld;
+  }
+
+  /**
+   * This method initializes groteStraatVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getGroteStraatVeld() {
+    if (groteStraatVeld == null) {
+      groteStraatVeld = new JTextField();
+      groteStraatVeld.setBounds(new Rectangle(163, 238, 28, 25));
+      groteStraatVeld.setForeground(Color.blue);
+      groteStraatVeld.setEditable(false);
+      groteStraatVeld.setBackground(Color.white);
+      groteStraatVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return groteStraatVeld;
+  }
+
+  /**
+   * This method initializes yahtzeeVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getYahtzeeVeld() {
+    if (yahtzeeVeld == null) {
+      yahtzeeVeld = new JTextField();
+      yahtzeeVeld.setBounds(new Rectangle(163, 264, 28, 25));
+      yahtzeeVeld.setForeground(Color.blue);
+      yahtzeeVeld.setEditable(false);
+      yahtzeeVeld.setBackground(Color.white);
+      yahtzeeVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return yahtzeeVeld;
+  }
+
+  /**
+   * This method initializes chanceVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getChanceVeld() {
+    if (chanceVeld == null) {
+      chanceVeld = new JTextField();
+      chanceVeld.setBounds(new Rectangle(163, 290, 28, 25));
+      chanceVeld.setForeground(Color.blue);
+      chanceVeld.setEditable(false);
+      chanceVeld.setBackground(Color.white);
+      chanceVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return chanceVeld;
+  }
+
+  /**
+   * This method initializes nieuwSpelKnop	
+   * 	
+   * @return javax.swing.JButton	
+   */
+  private JButton getNieuwSpelKnop() {
+    if (nieuwSpelKnop == null) {
+      nieuwSpelKnop = new JButton();
+      nieuwSpelKnop.setBounds(new Rectangle(96, 355, 99, 34));
+      nieuwSpelKnop.setText("Nieuw spel");
+      nieuwSpelKnop.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+          nieuwSpelKnopAction();
+        }
+      });
+    }
+    return nieuwSpelKnop;
+  }
+
+  /**
+   * This method initializes totaalVeld	
+   * 	
+   * @return javax.swing.JTextField	
+   */
+  private JTextField getTotaalVeld() {
+    if (totaalVeld == null) {
+      totaalVeld = new JTextField();
+      totaalVeld.setBounds(new Rectangle(89, 290, 53, 25));
+      totaalVeld.setForeground(Color.red);
+      totaalVeld.setEditable(false);
+      totaalVeld.setBackground(Color.white);
+      totaalVeld.setFont(new Font("Dialog", Font.BOLD, 14));
+    }
+    return totaalVeld;
+  }
+
+}
