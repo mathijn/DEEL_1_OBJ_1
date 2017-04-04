@@ -4,6 +4,7 @@ public class Verkiezingsprogramma {
   public static void main(String[] args) {
 
     // type na deze regel de opdrachten in
+    Stemmachine machine = new Stemmachine();
 
   }
 }
